@@ -1,0 +1,42 @@
+{
+  "name": "@regresso/next",
+  "version": "0.0.0",
+  "description": "Regresso for Next.js: withRegresso(nextConfig) and the client entry for instrumentation-client.ts.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsup && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@regresso/browser": "workspace:^",
+    "@regresso/unplugin": "workspace:^"
+  },
+  "peerDependencies": {
+    "next": ">=15.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "next": "^16.4.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tsup": "^9.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

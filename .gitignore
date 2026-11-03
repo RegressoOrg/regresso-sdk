@@ -27,3 +27,11 @@ coverage/
 
 # Claude Code local-only settings
 .claude/settings.local.json
+
+# Spike output: keep the report, not the raw data
+examples/next-app/spike-results/*
+!examples/next-app/spike-results/report.md
+!examples/next-app/spike-results/report.json
+.regresso/
+*.tsbuildinfo
+next-env.d.ts
