@@ -18,6 +18,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsup && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",

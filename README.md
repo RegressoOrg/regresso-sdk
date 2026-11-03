@@ -35,4 +35,4 @@ Tooling: pnpm workspaces, Turborepo, TypeScript (strict, ESM only), tsup for bun
 declarations, Vitest, Biome, Changesets. Packages in this repo depend on each other with `workspace:^`,
 which pnpm rewrites to a semver range on publish; packages from other repos are always semver ranges.
 
-Releases: add a changeset with `pnpm changeset`. Nothing is published yet.
+Releases: add a changeset with `pnpm changeset`. Packages publish publicly under the `@regresso` npm scope; nothing is published yet.
