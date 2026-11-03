@@ -1,0 +1,45 @@
+{
+  "name": "@regresso/unplugin",
+  "version": "0.0.0",
+  "description": "Regresso build plugin: tags each component's outermost element with data-cwv and writes a component manifest.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./webpack": {
+      "types": "./dist/webpack.d.ts",
+      "default": "./dist/webpack.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsup && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "magic-string": "^1.4.5",
+    "oxc-parser": "^0.157.0",
+    "unplugin": "^3.7.0"
+  },
+  "devDependencies": {
+    "@oxc-project/types": "^0.157.0",
+    "@regresso/protocol": "workspace:^",
+    "@types/node": "^22.20.5",
+    "tsup": "^9.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

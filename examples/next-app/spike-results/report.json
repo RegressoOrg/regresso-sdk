@@ -1,0 +1,240 @@
+{
+  "date": "2026-11-03T22:40:58.453Z",
+  "node": "v22.23.4",
+  "serverComponents": [
+    {
+      "name": "RootLayout",
+      "file": "examples/next-app/app/layout.tsx",
+      "id": "fti4o36a",
+      "inHtml": true
+    },
+    {
+      "name": "HomePage",
+      "file": "examples/next-app/app/page.tsx",
+      "id": "uvape13v",
+      "inHtml": true
+    },
+    {
+      "name": "ProductPage",
+      "file": "examples/next-app/app/products/[slug]/page.tsx",
+      "id": "d9evubkc",
+      "inHtml": true
+    },
+    {
+      "name": "ProductCard",
+      "file": "examples/next-app/components/product-card.tsx",
+      "id": "08uafgni",
+      "inHtml": true
+    },
+    {
+      "name": "ProductGallery",
+      "file": "examples/next-app/components/product-gallery.tsx",
+      "id": "aqwlgubt",
+      "inHtml": true
+    },
+    {
+      "name": "Stars",
+      "file": "examples/next-app/components/reviews.tsx",
+      "id": "v1wtya2d",
+      "inHtml": true
+    },
+    {
+      "name": "Reviews",
+      "file": "examples/next-app/components/reviews.tsx",
+      "id": "mt99f0j7",
+      "inHtml": true
+    },
+    {
+      "name": "SiteFooter",
+      "file": "examples/next-app/components/site-footer.tsx",
+      "id": "o8nhsx2c",
+      "inHtml": true
+    },
+    {
+      "name": "SiteHeader",
+      "file": "examples/next-app/components/site-header.tsx",
+      "id": "1ned71om",
+      "inHtml": true
+    }
+  ],
+  "clientComponents": [
+    {
+      "name": "AddToCart",
+      "file": "examples/next-app/components/add-to-cart.tsx",
+      "id": "grnw4oy7",
+      "inHtml": true
+    },
+    {
+      "name": "PromoBanner",
+      "file": "examples/next-app/components/promo-banner.tsx",
+      "id": "fluxn3gs",
+      "inHtml": true
+    }
+  ],
+  "stability": {
+    "aVsB": {
+      "sameIds": true,
+      "sameKeys": true,
+      "idCount": 11,
+      "contentHashChanged": [],
+      "buildIds": [
+        "a03fc282419b-mw19vfi35545",
+        "a03fc282419b-mw19w4uu1eaf"
+      ]
+    },
+    "bVsC": {
+      "edited": "components/add-to-cart.tsx",
+      "sameIds": true,
+      "sameKeys": true,
+      "idCount": 11,
+      "contentHashChanged": [
+        "AddToCart (examples/next-app/components/add-to-cart.tsx)"
+      ],
+      "buildIds": [
+        "a03fc282419b-mw19w4uu1eaf",
+        "a03fc282419b-mw19wsq3ae40"
+      ]
+    }
+  },
+  "buildTimesMs": {
+    "a": 32064,
+    "b": 30904
+  },
+  "html": [
+    {
+      "page": "/",
+      "untaggedBytes": 6951,
+      "taggedBytes": 7275,
+      "addedBytes": 324,
+      "addedPct": 4.66,
+      "untaggedGzip": 2196,
+      "taggedGzip": 2277,
+      "addedGzipBytes": 81,
+      "addedGzipPct": 3.69,
+      "attributes": 7,
+      "attributeBytes": 140,
+      "flightCopies": 7,
+      "flightBytes": 175
+    },
+    {
+      "page": "/products/espresso-machine",
+      "untaggedBytes": 8488,
+      "taggedBytes": 8898,
+      "addedBytes": 410,
+      "addedPct": 4.83,
+      "untaggedGzip": 2599,
+      "taggedGzip": 2742,
+      "addedGzipBytes": 143,
+      "addedGzipPct": 5.5,
+      "attributes": 10,
+      "attributeBytes": 200,
+      "flightCopies": 8,
+      "flightBytes": 200
+    }
+  ],
+  "pages": {
+    "untagged": {
+      "/": {
+        "bytes": 6951,
+        "gzip": 2196,
+        "attributes": 0,
+        "attributeBytes": 0,
+        "flightCopies": 0,
+        "flightBytes": 0
+      },
+      "/products/espresso-machine": {
+        "bytes": 8488,
+        "gzip": 2599,
+        "attributes": 0,
+        "attributeBytes": 0,
+        "flightCopies": 0,
+        "flightBytes": 0
+      }
+    },
+    "tagged": {
+      "/": {
+        "bytes": 7275,
+        "gzip": 2277,
+        "attributes": 7,
+        "attributeBytes": 140,
+        "flightCopies": 7,
+        "flightBytes": 175
+      },
+      "/products/espresso-machine": {
+        "bytes": 8898,
+        "gzip": 2742,
+        "attributes": 10,
+        "attributeBytes": 200,
+        "flightCopies": 8,
+        "flightBytes": 200
+      }
+    }
+  },
+  "e2e": {
+    "beacons": 1,
+    "beacon": {
+      "v": 1,
+      "pk": "pk_example_local",
+      "bid": "a03fc282419b-mw19xc3u9d2d",
+      "p": "/products/espresso-machine",
+      "nav": "navigate",
+      "sid": "e458a572169eba15b2e5652f",
+      "sr": 1,
+      "q": 0,
+      "m": {
+        "lcp": {
+          "v": 800,
+          "c": "fluxn3gs",
+          "el": "aside",
+          "ttfb": 34,
+          "loadDelay": 0,
+          "loadDuration": 0,
+          "renderDelay": 766
+        },
+        "inp": {
+          "v": 264,
+          "c": "grnw4oy7",
+          "type": "pointer",
+          "inputDelay": 1,
+          "processing": 256,
+          "presentation": 8,
+          "load": "complete",
+          "script": {
+            "url": "http://localhost:3199/_next/static/chunks/4f9b4e19-35d8e87023538a9e.js",
+            "dur": 252,
+            "part": "processing-duration"
+          }
+        },
+        "cls": {
+          "v": 0.0492,
+          "c": "d9evubkc",
+          "src": [
+            "d9evubkc"
+          ],
+          "largest": 0.0492
+        },
+        "fcp": {
+          "v": 116,
+          "ttfb": 34
+        },
+        "ttfb": {
+          "v": 34,
+          "wait": 0,
+          "cache": 2,
+          "dns": 0,
+          "conn": 0,
+          "req": 31
+        }
+      }
+    },
+    "attributed": {
+      "lcp": "PromoBanner",
+      "inp": "AddToCart",
+      "cls": "ProductPage",
+      "clsSources": [
+        "ProductPage"
+      ]
+    },
+    "pathnameOnly": true
+  }
+}

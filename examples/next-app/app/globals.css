@@ -1,0 +1,55 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #222;
+  background: #faf7f2;
+}
+header,
+footer,
+main {
+  padding: 16px 24px;
+}
+header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border-bottom: 1px solid #e5ddd0;
+}
+footer {
+  border-top: 1px solid #e5ddd0;
+  color: #777;
+  font-size: 14px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.card {
+  background: #fff;
+  border: 1px solid #e5ddd0;
+  border-radius: 8px;
+  padding: 16px;
+}
+.hero {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.promo {
+  background: #3b2614;
+  color: #fff;
+  padding: 24px;
+}
+button {
+  font: inherit;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: 0;
+  background: #6b4a2b;
+  color: #fff;
+  cursor: pointer;
+}
