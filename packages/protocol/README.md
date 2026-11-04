@@ -1,7 +1,20 @@
 # @regresso/protocol
 
-The beacon format shared by the Regresso browser client and the ingest Worker: TypeScript types, a
-validator, and encode/decode helpers. No dependencies; runs in browsers, Cloudflare Workers and Node.
+The two wire formats of Regresso, with TypeScript types and validators:
+
+- the **beacon** (browser → ingest Worker), sent by [`@regresso/browser`](../browser);
+- the **build upload** (CI → API), sent by [`@regresso/unplugin`](../unplugin) at the end of a build.
+
+No dependencies; runs in browsers, Cloudflare Workers and Node. Everything is tree-shakeable, so the browser
+bundle only contains what the client uses.
+
+## Install
+
+```bash
+npm install @regresso/protocol
+```
+
+## Usage
 
 ```ts
 import { decodeBeacon } from "@regresso/protocol";
@@ -18,6 +31,9 @@ const beacon = result.value; // only known fields; safe to store as-is
 | `decodeBeacon(body)`                | Size check (`MAX_BEACON_BYTES`, 8 KB), `JSON.parse`, then `validateBeacon`. Takes a string, `ArrayBuffer` or `Uint8Array`. Never throws.                                                   |
 | `encodeBeacon(beacon)`              | Compact JSON, sent as a `text/plain` body.                                                                                                                                                 |
 | `isBeacon(value)`                   | Type guard.                                                                                                                                                                                |
+| `validateBuildUpload(value)`        | Validates a parsed build upload. Same result shape and guarantees as `validateBeacon`.                                                                                                      |
+| `isBuildUpload(value)`              | Type guard.                                                                                                                                                                                |
+| `BuildUploadV1`, `BuildUpload`, …   | Build upload types.                                                                                                                                                                       |
 | `BeaconV1`, `Beacon`, …             | Types. `Beacon` is the union of every version this package decodes.                                                                                                                        |
 | `*_RE`, `MAX_*`, `PROTOCOL_VERSION` | The formats and bounds the validator enforces.                                                                                                                                             |
 
@@ -93,6 +109,50 @@ strings, full URLs, user ids, IPs or user agents, and the formats above reject v
 them (for example, a pathname with a query string or a script URL with a token). Country and device class
 are added at the edge from request metadata; the IP and user agent are never stored.
 
+## Build upload v1
+
+What `@regresso/unplugin` POSTs to `{REGRESSO_API_URL}/v1/builds` after a production build, gzip-encoded JSON
+with `Authorization: Bearer <build token>`. The API answers `201 { buildId, projectId }`. It is also written to
+`<dir>/manifest.json`, so you can see exactly what was sent.
+
+```ts
+import { validateBuildUpload } from "@regresso/protocol";
+
+// In the API
+const result = validateBuildUpload(JSON.parse(gunzip(body)));
+if (!result.ok) return Response.json({ issues: result.issues }, { status: 400 });
+```
+
+```jsonc
+{
+  "v": 1,
+  "framework": "next",                       // adapter or bundler
+  "buildId": "a03fc282419b-mw19kh7c39cb",     // = the beacon's bid
+  "gitSha": "a03fc282419bfd1453dfccc9d2f4e20a77d8e543",  // or null
+  "branch": "main",                          // or null
+  "env": "production",                       // production | preview | development
+  "createdAt": "2026-11-04T12:00:00.000Z",
+  "components": [
+    { "id": "grnw4oy7", "name": "AddToCart", "file": "components/add-to-cart.tsx", "line": 6, "contentHash": "25d14e0d8eb550a3" }
+  ],
+  "routes": ["/", "/products/[slug]", "/blog/[...slug]", "/docs/[[...path]]"]
+}
+```
+
+| Field | Type | Rule |
+|---|---|---|
+| `v` | `1` | Required. |
+| `framework` | string | `[a-z0-9][a-z0-9.-]{0,31}`. |
+| `buildId` | string | Same format as the beacon's `bid`. |
+| `gitSha` | string \| null | 7–64 lower-case hex. Present, `null` when unknown. |
+| `branch` | string \| null | ≤ 255 chars, no whitespace. Present, `null` when unknown. |
+| `env` | enum | `production`, `preview`, `development`. Previews are excluded from deploy detection. |
+| `createdAt` | string | ISO 8601 UTC (`toISOString()`). |
+| `components[]` | object | At most 100,000. `id`: component id format; `name`: identifier ≤ 128 chars; `file`: repo-relative POSIX path, no leading `/` or `..`; `line`: ≥ 1; `contentHash`: 16–64 lower-case hex. |
+| `routes[]` | string | At most 20,000 route templates in Next.js syntax (`[x]`, `[...x]`, `[[...x]]`), starting with `/`, no query, fragment, whitespace or route groups `(group)`. Matched against the beacon's pathname at the edge. |
+
+The same compatibility rules apply as for the beacon, below.
+
 ## Compatibility rules
 
 The ingest Worker validates with this package, and old clients stay cached in browsers and CDNs for months.
@@ -116,3 +176,12 @@ So:
 
 The tests in `test/protocol.test.ts` pin the current formats and bounds; a change that makes one of them
 fail is a compatibility change and needs to follow these rules.
+
+## Troubleshooting
+
+- **`unsupported version`**: the input's `v` isn't one this release reads. Upgrade `@regresso/protocol` in the
+  reader first (rule 4).
+- **An issue for a field you didn't send**: validators report required fields as `required`; for the build
+  upload, `gitSha` and `branch` must be present, as `null` when unknown.
+- **A field is missing from `value`**: validators drop unknown fields (rule 3). Check its spelling against the
+  types.

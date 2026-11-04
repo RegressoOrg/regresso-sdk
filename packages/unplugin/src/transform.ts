@@ -1,23 +1,17 @@
 import { createHash } from "node:crypto";
+import type { BuildComponentV1 } from "@regresso/protocol";
 import MagicString, { type SourceMap } from "magic-string";
 import { parseSync } from "oxc-parser";
 
 /** The attribute added to each component's outermost host elements. */
 export const ATTR = "data-cwv";
 
-/** One component found in a source file. Field names match the build manifest. */
-export interface ComponentRecord {
-  /** `data-cwv` value: {@link componentId} of (file, name). */
-  id: string;
-  /** Declared name, or `default` for an anonymous default export. */
-  name: string;
-  /** Repo-relative POSIX path. */
-  file: string;
-  /** 1-based line of the declaration. */
-  line: number;
-  /** {@link contentHash} of the whole source file. */
-  content_hash: string;
-}
+/**
+ * One component found in a source file: `id` (the `data-cwv` value, {@link componentId} of file and
+ * name), `name`, repo-relative POSIX `file`, 1-based `line`, and `contentHash` of the whole file.
+ * The same shape as a component in the build upload.
+ */
+export type ComponentRecord = BuildComponentV1;
 
 export interface TransformResult {
   code: string;
@@ -231,7 +225,7 @@ export function transformJsx(code: string, options: TransformOptions): Transform
       name: c.name,
       file: options.file,
       line: lineAt(code, c.start),
-      content_hash: hash,
+      contentHash: hash,
     });
     for (const el of elements) {
       const at = el.openingElement.name.end;

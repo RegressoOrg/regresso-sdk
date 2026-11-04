@@ -1,6 +1,6 @@
 // Spike 1: tagging. Builds this app several times and measures
 //   1. that server components are tagged,
-//   2. that component_id is identical across builds while content_hash follows file edits,
+//   2. that component_id is identical across builds while contentHash follows file edits,
 //   3. what data-cwv costs in HTML bytes,
 //   4. (if Playwright is available) that a real page view produces a valid, attributed beacon.
 // Writes spike-results/report.json and spike-results/report.md.
@@ -30,7 +30,14 @@ const EDITED = "components/add-to-cart.tsx";
 const PORT = 3199;
 
 mkdirSync(out, { recursive: true });
-const baseEnv = { ...process.env, NEXT_TELEMETRY_DISABLED: "1" };
+const baseEnv = {
+  ...process.env,
+  NEXT_TELEMETRY_DISABLED: "1",
+  // Beacons go to this app's own /api/beacon, which validates and logs them.
+  NEXT_PUBLIC_REGRESSO_KEY: "pk_example_local",
+  REGRESSO_INGEST_URL: "/api/beacon",
+};
+delete baseEnv.REGRESSO_BUILD_TOKEN; // never upload spike builds
 delete baseEnv.REGRESSO_BUILD_ID; // each build makes its own
 delete baseEnv.REGRESSO_DISABLE;
 const log = (...a) => console.log("[spike]", ...a);
@@ -120,7 +127,7 @@ function compareManifests(a, b) {
   const B = byId(b);
   const sameIds = A.size === B.size && [...A.keys()].every((id) => B.has(id));
   const changed = [...A.values()]
-    .filter((c) => B.get(c.id)?.content_hash !== c.content_hash)
+    .filter((c) => B.get(c.id)?.contentHash !== c.contentHash)
     .map((c) => `${c.name} (${c.file})`);
   const sameKeys = [...A.values()].every((c) => {
     const o = B.get(c.id);
@@ -131,7 +138,7 @@ function compareManifests(a, b) {
     sameKeys,
     idCount: A.size,
     contentHashChanged: changed,
-    buildIds: [a.build_id, b.build_id],
+    buildIds: [a.buildId, b.buildId],
   };
 }
 
@@ -300,7 +307,7 @@ const md = [
   "",
   "## component_id stability",
   "",
-  "| Comparison | Build ids | Same ids | Changed content_hash |",
+  "| Comparison | Build ids | Same ids | Changed contentHash |",
   "|---|---|---|---|",
   `| A vs B, two clean builds, no change | \`${report.stability.aVsB.buildIds.join("` / `")}\` | ${yes(report.stability.aVsB.sameIds && report.stability.aVsB.sameKeys)} (${report.stability.aVsB.idCount}) | ${report.stability.aVsB.contentHashChanged.join(", ") || "none"} |`,
   `| B vs C, warm cache, \`${EDITED}\` edited | \`${report.stability.bVsC.buildIds.join("` / `")}\` | ${yes(report.stability.bVsC.sameIds && report.stability.bVsC.sameKeys)} (${report.stability.bVsC.idCount}) | ${report.stability.bVsC.contentHashChanged.join(", ") || "none"} |`,

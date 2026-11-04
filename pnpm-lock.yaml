@@ -91,6 +91,9 @@ importers:
       '@regresso/browser':
         specifier: workspace:^
         version: link:../browser
+      '@regresso/protocol':
+        specifier: workspace:^
+        version: link:../protocol
       '@regresso/unplugin':
         specifier: workspace:^
         version: link:../unplugin
@@ -131,6 +134,9 @@ importers:
 
   packages/unplugin:
     dependencies:
+      '@regresso/protocol':
+        specifier: workspace:^
+        version: link:../protocol
       magic-string:
         specifier: ^1.4.5
         version: 1.4.5
@@ -144,9 +150,6 @@ importers:
       '@oxc-project/types':
         specifier: ^0.157.0
         version: 0.157.0
-      '@regresso/protocol':
-        specifier: workspace:^
-        version: link:../protocol
       '@types/node':
         specifier: ^22.20.5
         version: 22.20.5

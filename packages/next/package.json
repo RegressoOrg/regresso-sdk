@@ -3,6 +3,19 @@
   "version": "0.0.0",
   "description": "Regresso for Next.js: withRegresso(nextConfig) and the client entry for instrumentation-client.ts.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeff-spurlock/regresso-sdk.git",
+    "directory": "packages/next"
+  },
+  "homepage": "https://github.com/jeff-spurlock/regresso-sdk/tree/main/packages/next#readme",
+  "keywords": [
+    "nextjs",
+    "next",
+    "web-vitals",
+    "core-web-vitals",
+    "rum"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -19,7 +32,8 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsup && tsc -p tsconfig.build.json",
@@ -28,10 +42,11 @@
   },
   "dependencies": {
     "@regresso/browser": "workspace:^",
+    "@regresso/protocol": "workspace:^",
     "@regresso/unplugin": "workspace:^"
   },
   "peerDependencies": {
-    "next": ">=15.3.0"
+    "next": ">=15.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
