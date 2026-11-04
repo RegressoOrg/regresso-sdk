@@ -3,6 +3,18 @@
   "version": "0.0.0",
   "description": "Regresso browser client: Core Web Vitals with component attribution, one beacon per page view.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeff-spurlock/regresso-sdk.git",
+    "directory": "packages/browser"
+  },
+  "homepage": "https://github.com/jeff-spurlock/regresso-sdk/tree/main/packages/browser#readme",
+  "keywords": [
+    "web-vitals",
+    "core-web-vitals",
+    "rum",
+    "performance"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -15,7 +27,8 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsup && tsc -p tsconfig.build.json",

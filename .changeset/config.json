@@ -6,7 +6,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "ignore": ["next-app"],
-  "fixed": [],
+  "fixed": [["@regresso/*"]],
   "linked": [],
   "updateInternalDependencies": "patch"
 }

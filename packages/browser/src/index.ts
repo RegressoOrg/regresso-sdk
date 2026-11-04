@@ -24,25 +24,46 @@ import {
 
 export { ATTR, nearestComponent } from "./attribution.js";
 
+/** Default beacon endpoint when neither `endpoint` nor `REGRESSO_INGEST_URL` is set. */
+export const DEFAULT_ENDPOINT = "https://ingest.regresso.dev";
+
+/** `granted`: send beacons. `pending`: measure, but hold beacons until {@link setConsent}(true). */
+export type Consent = "granted" | "pending";
+
 export interface RegressoOptions {
-  /** Project public key, `pk_…`. */
-  pk: string;
-  /** URL beacons are POSTed to. */
-  endpoint: string;
-  /** Build id of the running bundle. `@regresso/next/client` fills this in for you. */
-  buildId: string;
   /**
-   * Share of page views to measure, 0 < sampleRate ≤ 1. Default 1. The decision is made once per
-   * page load; unsampled pages register no observers at all.
+   * Project public key, `pk_…`. Default: the key the framework adapter injected at build time from
+   * the framework's public env variable (Next.js: `NEXT_PUBLIC_REGRESSO_KEY`).
+   */
+  publicKey?: string;
+  /**
+   * URL beacons are POSTed to. Default: `REGRESSO_INGEST_URL` at build time, else
+   * {@link DEFAULT_ENDPOINT}.
+   */
+  endpoint?: string;
+  /**
+   * Share of page views to measure, 0 < sampleRate ≤ 1. Default 1. Decided once per page load;
+   * unsampled pages register no observers at all.
    */
   sampleRate?: number;
   /**
-   * Consent hook, called synchronously each time a beacon is about to be sent (the page is being
-   * hidden, so it cannot wait for a promise). Return false to hold the beacon; it is sent at the next
-   * opportunity once this returns true, and dropped if the page is closed first. Default: always true.
+   * Starting consent state. Default `granted`. With `pending`, metrics are measured but nothing is
+   * sent until {@link setConsent}(true); a call to `setConsent` before `initRegresso` wins.
    */
-  consent?: () => boolean;
+  consent?: Consent;
+  /** Log configuration problems, sampling decisions and every beacon to the console. Default false. */
+  debug?: boolean;
+  /** Build id of the running bundle. Default: the one the build plugin injected. */
+  buildId?: string;
 }
+
+interface Injected {
+  buildId?: string;
+  publicKey?: string;
+  endpoint?: string;
+}
+
+declare const __REGRESSO_BUILD__: Injected | undefined;
 
 interface PageView {
   /** web-vitals navigationId: a new one starts on bfcache restore. */
@@ -52,6 +73,9 @@ interface PageView {
 }
 
 let started = false;
+let consent: Consent | undefined;
+/** Set by initRegresso: sends whatever was held while consent was pending. */
+let flush: (() => void) | undefined;
 
 function pageViewId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(12));
@@ -61,34 +85,67 @@ function pageViewId(): string {
 }
 
 /**
- * Starts measuring Core Web Vitals for this page load and sends one beacon per page view
- * when the page is hidden. Safe to call more than once; later calls are ignored.
+ * Grants or withdraws consent. Granting sends anything held while consent was pending (if the page
+ * was already hidden) and lets later beacons go out; withdrawing holds them again. Safe to call
+ * before {@link initRegresso} and during SSR.
  */
-export function init(options: RegressoOptions): void {
+export function setConsent(granted: boolean): void {
+  consent = granted ? "granted" : "pending";
+  if (granted) flush?.();
+}
+
+/**
+ * Starts measuring Core Web Vitals for this page load and sends one beacon per page view when the
+ * page is hidden. Safe to call more than once (later calls are ignored) and during SSR (does nothing).
+ */
+export function initRegresso(options: RegressoOptions = {}): void {
   if (started || typeof window === "undefined") return;
   started = true;
 
+  const injected: Injected = typeof __REGRESSO_BUILD__ === "object" ? __REGRESSO_BUILD__ : {};
+  const debug = options.debug === true;
+  const log = (...args: unknown[]) => debug && console.info("[regresso]", ...args);
+  const pk = options.publicKey ?? injected.publicKey;
+  const bid = options.buildId ?? injected.buildId;
+  const endpoint = options.endpoint ?? injected.endpoint ?? DEFAULT_ENDPOINT;
   const sr = options.sampleRate ?? 1;
-  if (!(sr > 0 && sr <= 1) || Math.random() >= sr) return;
 
-  const consent = options.consent ?? (() => true);
+  // Without a key or build id the ingest would reject every beacon, so say so even without debug.
+  // Kept short: these strings ship in every bundle. The READMEs' troubleshooting sections explain.
+  const problem = !pk ? "publicKey" : !bid ? "buildId" : sr > 0 && sr <= 1 ? "" : "sampleRate";
+  if (problem) {
+    console.warn(`[regresso] not started: missing or invalid ${problem}`);
+    return;
+  }
+
+  consent ??= options.consent ?? "granted";
+  if (Math.random() >= sr) {
+    log("not sampled", sr);
+    return;
+  }
+  log("started", { pk, bid, endpoint, sr, consent });
+
   let view: PageView | undefined;
+  /** A hide happened while consent was pending, so a beacon is waiting. */
+  let held = false;
 
   const send = (): void => {
     if (!view?.dirty) return;
-    try {
-      if (!consent()) return;
-    } catch {
+    if (consent !== "granted") {
+      held = true;
+      log("consent pending, held");
       return;
     }
+    held = false;
     const body = encodeBeacon(view.b);
+    if (debug) log("beacon", JSON.parse(body));
     view.dirty = false;
     view.b.q = (view.b.q ?? 0) + 1;
     try {
-      if (navigator.sendBeacon?.(options.endpoint, body)) return;
+      if (navigator.sendBeacon?.(endpoint, body)) return;
     } catch {}
     // A string body is sent as text/plain, so neither path triggers a CORS preflight.
-    fetch(options.endpoint, {
+    fetch(endpoint, {
       method: "POST",
       body,
       keepalive: true,
@@ -96,6 +153,7 @@ export function init(options: RegressoOptions): void {
       credentials: "omit",
     }).catch(() => {});
   };
+  flush = () => held && send();
 
   const record = (m: MetricWithAttribution, key: keyof MetricsV1, entry: unknown): void => {
     if (!view || view.nav !== m.navigationId) {
@@ -105,8 +163,8 @@ export function init(options: RegressoOptions): void {
         dirty: false,
         b: {
           v: PROTOCOL_VERSION,
-          pk: options.pk,
-          bid: options.buildId,
+          pk: pk as string,
+          bid: bid as string,
           p: location.pathname,
           nav: m.navigationType as NavigationType,
           sid: pageViewId(),

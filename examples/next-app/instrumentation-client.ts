@@ -1,10 +1,13 @@
 import { initRegresso } from "@regresso/next/client";
 
+// The public key (NEXT_PUBLIC_REGRESSO_KEY), the endpoint (REGRESSO_INGEST_URL) and the build id are
+// injected by withRegresso() at build time. See .env.example.
 initRegresso({
-  pk: process.env.NEXT_PUBLIC_REGRESSO_PK ?? "pk_example_local",
-  // Defaults to this app's own debug endpoint, which validates and logs each beacon.
-  endpoint: process.env.NEXT_PUBLIC_REGRESSO_ENDPOINT ?? "/api/beacon",
   sampleRate: 1,
-  // Replace with your consent manager's state, e.g. () => window.cmp?.analytics === true.
-  consent: () => true,
+  // With a consent manager, start "pending" and call setConsent(true) from its callback:
+  //   import { setConsent } from "@regresso/next/client";
+  //   cmp.on("consent", (c) => setConsent(c.analytics));
+  consent: "granted",
+  // Logs every beacon to the browser console.
+  debug: process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_REGRESSO_DEBUG === "1",
 });

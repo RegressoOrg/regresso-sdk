@@ -1,7 +1,7 @@
 import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { COMPONENT_ID_RE } from "@regresso/protocol";
+import { COMPONENT_ID_RE, validateBuildUpload } from "@regresso/protocol";
 import { describe, expect, it } from "vitest";
 import {
   componentId,
@@ -185,14 +185,14 @@ export function Añadir({ label }: P) {
         name: "A",
         file: FILE,
         line: 3,
-        content_hash: contentHash(src),
+        contentHash: contentHash(src),
       },
       {
         id: componentId(FILE, "B"),
         name: "B",
         file: FILE,
         line: 5,
-        content_hash: contentHash(src),
+        contentHash: contentHash(src),
       },
     ]);
   });
@@ -201,7 +201,7 @@ export function Añadir({ label }: P) {
     const a = run("export function A() { return <div /> }");
     const b = run("export function A() { return <div className='x'>changed</div> }");
     expect(a?.components[0]?.id).toBe(b?.components[0]?.id);
-    expect(a?.components[0]?.content_hash).not.toBe(b?.components[0]?.content_hash);
+    expect(a?.components[0]?.contentHash).not.toBe(b?.components[0]?.contentHash);
   });
 
   it("parses plain .js files with JSX", () => {
@@ -230,32 +230,38 @@ describe("writeManifest", () => {
       name,
       file,
       line,
-      content_hash: "0".repeat(16),
+      contentHash: "0".repeat(16),
     });
     await writeFile(join(dir, "fragments.keep"), "");
-    await writeManifest(dir, "stale", {
-      build_id: "old",
-      git_sha: null,
-      components: [c("Old", "x.tsx")],
+    const meta = (buildId: string) => ({
+      framework: "next",
+      buildId,
+      gitSha: "abc1234",
+      branch: "main",
+      env: "production" as const,
     });
-    await writeManifest(dir, "server", {
-      build_id: "b1",
-      git_sha: "abc",
-      components: [c("Page", "app/page.tsx"), c("Shared", "app/shared.tsx")],
-    });
-    const m = await writeManifest(dir, "client", {
-      build_id: "b1",
-      git_sha: "abc",
-      components: [c("Shared", "app/shared.tsx"), c("Button", "app/button.tsx")],
-    });
+    await writeManifest(dir, "stale", meta("old"), [c("Old", "x.tsx")]);
+    await writeManifest(dir, "server", meta("b1"), [
+      c("Page", "app/page.tsx"),
+      c("Shared", "app/shared.tsx"),
+    ]);
+    const m = await writeManifest(
+      dir,
+      "client",
+      meta("b1"),
+      [c("Shared", "app/shared.tsx"), c("Button", "app/button.tsx")],
+      ["/products/[slug]", "/", "/"],
+    );
     expect(m.components.map((x) => x.name)).toEqual(["Button", "Page", "Shared"]);
     const onDisk = JSON.parse(await readFile(join(dir, "manifest.json"), "utf8"));
     expect(onDisk).toEqual({
-      manifest_version: 1,
-      build_id: "b1",
-      git_sha: "abc",
+      v: 1,
+      ...meta("b1"),
+      createdAt: m.createdAt,
       components: m.components,
+      routes: ["/", "/products/[slug]"],
     });
+    expect(validateBuildUpload(onDisk).ok).toBe(true);
   });
 });
 

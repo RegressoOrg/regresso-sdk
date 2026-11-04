@@ -3,6 +3,17 @@
   "version": "0.0.0",
   "description": "Regresso beacon protocol: types, validator and codec shared by the browser client and the ingest Worker.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeff-spurlock/regresso-sdk.git",
+    "directory": "packages/protocol"
+  },
+  "homepage": "https://github.com/jeff-spurlock/regresso-sdk/tree/main/packages/protocol#readme",
+  "keywords": [
+    "web-vitals",
+    "core-web-vitals",
+    "rum"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -15,7 +26,8 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsup && tsc -p tsconfig.build.json",

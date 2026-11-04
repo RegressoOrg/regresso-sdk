@@ -143,7 +143,7 @@ describe("metric mapping", () => {
   });
 });
 
-describe("init", () => {
+describe("initRegresso", () => {
   const sendBeacon = vi.fn((_url: string, _body: string) => true);
 
   beforeEach(() => {
@@ -177,9 +177,14 @@ describe("init", () => {
   };
 
   async function start(opts: Record<string, unknown> = {}) {
-    const { init } = await import("../src/index.js");
-    init({ pk: "pk_test1234abcd", endpoint: "https://in.example.com/b", buildId: "b1", ...opts });
-    return init;
+    const mod = await import("../src/index.js");
+    mod.initRegresso({
+      publicKey: "pk_test1234abcd",
+      endpoint: "https://in.example.com/b",
+      buildId: "b1",
+      ...opts,
+    });
+    return mod;
   }
 
   function sentBeacons() {
@@ -204,7 +209,7 @@ describe("init", () => {
 
   it("sends one valid beacon per page view on hide, with the pathname only", async () => {
     vi.spyOn(Math, "random").mockReturnValue(0.49);
-    await start({ sampleRate: 0.5, consent: () => true });
+    await start({ sampleRate: 0.5, consent: "granted" });
     fire("TTFB", ttfb);
     fire("FCP", { value: 900, attribution: { timeToFirstByte: 300 } });
     hide();
@@ -261,26 +266,82 @@ describe("init", () => {
     expect(b).toMatchObject({ nav: "back-forward-cache", q: 0, m: { fcp: { v: 5, ttfb: 0 } } });
   });
 
-  it("holds beacons until consent is given", async () => {
-    let ok = false;
-    await start({ consent: () => ok });
+  it("measures but holds beacons while consent is pending, then sends on hide", async () => {
+    const { setConsent } = await start({ consent: "pending" });
+    expect(Object.keys(cbs)).toHaveLength(5);
     fire("TTFB", ttfb);
-    hide();
+    setConsent(true); // not hidden yet: nothing to flush, the beacon goes at the next hide
     expect(sendBeacon).not.toHaveBeenCalled();
-    ok = true;
     hide();
     expect(sentBeacons()).toHaveLength(1);
   });
 
-  it("treats a throwing consent hook as no consent", async () => {
-    await start({
-      consent: () => {
-        throw new Error("cmp not ready");
-      },
-    });
+  it("flushes a beacon held at a hide as soon as consent is granted", async () => {
+    const { setConsent } = await start({ consent: "pending" });
     fire("TTFB", ttfb);
     hide();
     expect(sendBeacon).not.toHaveBeenCalled();
+    setConsent(true);
+    expect(sentBeacons()).toHaveLength(1);
+    setConsent(true); // nothing new
+    expect(sendBeacon).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds again after consent is withdrawn", async () => {
+    const { setConsent } = await start();
+    fire("TTFB", ttfb);
+    setConsent(false);
+    hide();
+    expect(sendBeacon).not.toHaveBeenCalled();
+  });
+
+  it("lets setConsent before initRegresso win over the consent option", async () => {
+    const mod = await import("../src/index.js");
+    mod.setConsent(false);
+    mod.initRegresso({ publicKey: "pk_test1234abcd", buildId: "b1", consent: "granted" });
+    fire("TTFB", ttfb);
+    hide();
+    expect(sendBeacon).not.toHaveBeenCalled();
+  });
+
+  it("defaults to the injected build constants, then the public ingest", async () => {
+    vi.stubGlobal("__REGRESSO_BUILD__", { buildId: "inj1", publicKey: "pk_injected123" });
+    const mod = await import("../src/index.js");
+    mod.initRegresso();
+    fire("TTFB", ttfb);
+    hide();
+    const [url, body] = sendBeacon.mock.calls[0] ?? [];
+    expect(url).toBe(mod.DEFAULT_ENDPOINT);
+    expect(JSON.parse(body as string)).toMatchObject({ pk: "pk_injected123", bid: "inj1" });
+    vi.unstubAllGlobals();
+  });
+
+  it.each([
+    [{ publicKey: undefined }, "publicKey"],
+    [{ buildId: undefined }, "buildId"],
+    [{ sampleRate: 2 }, "sampleRate"],
+  ])("warns and does nothing when %o", async (opts, word) => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await start(opts);
+    expect(Object.keys(cbs)).toHaveLength(0);
+    expect(String(warn.mock.calls[0]?.[0])).toContain(word);
+  });
+
+  it("logs each beacon with debug: true", async () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    await start({ debug: true });
+    fire("TTFB", ttfb);
+    hide();
+    const beaconLog = info.mock.calls.find((c) => c[1] === "beacon");
+    expect(beaconLog?.[2]).toMatchObject({ v: 1, bid: "b1", m: { ttfb: { v: 300 } } });
+  });
+
+  it("logs nothing without debug", async () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => {});
+    await start();
+    fire("TTFB", ttfb);
+    hide();
+    expect(info).not.toHaveBeenCalled();
   });
 
   it("registers nothing when the page is not sampled", async () => {
@@ -312,9 +373,9 @@ describe("init", () => {
     vi.unstubAllGlobals();
   });
 
-  it("ignores a second init", async () => {
-    const init = await start();
-    init({ pk: "pk_other1234abcd", endpoint: "https://x.test", buildId: "b2" });
+  it("ignores a second initRegresso", async () => {
+    const { initRegresso } = await start();
+    initRegresso({ publicKey: "pk_other1234abcd", endpoint: "https://x.test", buildId: "b2" });
     expect(optsSeen).toHaveLength(5);
   });
 });

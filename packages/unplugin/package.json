@@ -1,8 +1,21 @@
 {
   "name": "@regresso/unplugin",
   "version": "0.0.0",
-  "description": "Regresso build plugin: tags each component's outermost element with data-cwv and writes a component manifest.",
+  "description": "Regresso build plugin: tags each component's outermost element with data-cwv, writes the build manifest and uploads it.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeff-spurlock/regresso-sdk.git",
+    "directory": "packages/unplugin"
+  },
+  "homepage": "https://github.com/jeff-spurlock/regresso-sdk/tree/main/packages/unplugin#readme",
+  "keywords": [
+    "unplugin",
+    "webpack",
+    "vite",
+    "web-vitals",
+    "core-web-vitals"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -19,7 +32,8 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "engines": {
     "node": ">=22.12.0"
@@ -32,11 +46,11 @@
   "dependencies": {
     "magic-string": "^1.4.5",
     "oxc-parser": "^0.157.0",
-    "unplugin": "^3.7.0"
+    "unplugin": "^3.7.0",
+    "@regresso/protocol": "workspace:^"
   },
   "devDependencies": {
     "@oxc-project/types": "^0.157.0",
-    "@regresso/protocol": "workspace:^",
     "@types/node": "^22.20.5",
     "tsup": "^9.0.0",
     "typescript": "^7.0.2",

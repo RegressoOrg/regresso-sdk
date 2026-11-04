@@ -28,15 +28,19 @@ export type ValidationResult<T> = { ok: true; value: T } | { ok: false; issues: 
 /** Stop collecting after this many issues; a beacon this broken is rejected either way. */
 const MAX_ISSUES = 20;
 
-type Obj = Record<string, unknown>;
+/** @internal */
+export type Obj = Record<string, unknown>;
 
-const isObj = (x: unknown): x is Obj => typeof x === "object" && x !== null && !Array.isArray(x);
+/** @internal */
+export const isObj = (x: unknown): x is Obj =>
+  typeof x === "object" && x !== null && !Array.isArray(x);
 
 /**
  * Collects issues while copying known fields into a fresh object. Unknown fields are
  * dropped, which is what lets an older reader accept a newer v1 beacon (see README).
  */
-class Reader {
+/** @internal Shared with the build upload validator; not part of the public API. */
+export class Reader {
   issues: Issue[] = [];
 
   fail(path: string, message: string): undefined {
@@ -83,7 +87,8 @@ class Reader {
 }
 
 /** Copies `[key, value]` pairs whose value is defined, so optional fields stay absent, not `undefined`. */
-function pick<T>(entries: [string, unknown][]): T {
+/** @internal */
+export function pick<T>(entries: [string, unknown][]): T {
   const out: Obj = {};
   for (const [k, v] of entries) if (v !== undefined) out[k] = v;
   return out as T;

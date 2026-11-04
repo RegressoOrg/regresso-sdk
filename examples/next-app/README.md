@@ -2,12 +2,23 @@
 
 Fixture for the Regresso SDK: a small Next.js 16 App Router shop with server components (layout, pages,
 `ProductCard`, `ProductGallery`, `Reviews`, header and footer) and client components (`AddToCart`,
-`PromoBanner`). `app/api/beacon` stands in for the ingest Worker: it validates each beacon with
-`@regresso/protocol` and logs it.
+`PromoBanner`), and a page in a route group (`app/(info)/about`). `app/api/beacon` stands in for the ingest
+Worker: it validates each beacon with `@regresso/protocol` and logs it.
+
+It uses `@regresso/next` the way the [quickstart](../../packages/next#readme) describes: `withRegresso` in
+`next.config.ts`, `initRegresso` in `instrumentation-client.ts`, builds with `--webpack`.
 
 ```bash
-pnpm --filter next-app build && pnpm --filter next-app start
+cp examples/next-app/.env.example examples/next-app/.env.local   # then fill in a dev project's key
 ```
+
+```bash
+pnpm build && pnpm --filter next-app start
+```
+
+[`.env.example`](.env.example) points beacons at the development ingest. Set `REGRESSO_INGEST_URL=/api/beacon`
+instead to keep everything local: beacons are then validated and printed by this app's server. `debug` is on
+outside production builds (and with `NEXT_PUBLIC_REGRESSO_DEBUG=1`), so the browser console shows each beacon.
 
 Deliberate regressions, switched on at build time:
 
