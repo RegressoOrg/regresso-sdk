@@ -5,10 +5,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jeff-spurlock/regresso-sdk.git",
+    "url": "git+https://github.com/RegressoOrg/regresso-sdk.git",
     "directory": "packages/browser"
   },
-  "homepage": "https://github.com/jeff-spurlock/regresso-sdk/tree/main/packages/browser#readme",
+  "homepage": "https://github.com/RegressoOrg/regresso-sdk/tree/main/packages/browser#readme",
   "keywords": [
     "web-vitals",
     "core-web-vitals",

@@ -2,7 +2,7 @@
 
 The npm packages customers install. Will be open-sourced (MIT) at public launch; keep it private until then, and write it as if it were already public: no internal URLs, customer names or secrets.
 
-Part of the Regresso workspace (meta-repo: jeff-spurlock/regresso, checked out as a submodule). Product, architecture and open decisions live in the meta-repo: `../CLAUDE.md`, `../docs/business-plan.md`, `../docs/architecture/backend-exploration.md`. Read them before making design decisions; if this repo is checked out on its own, ask for them.
+Part of the Regresso workspace (meta-repo: RegressoOrg/regresso, checked out as a submodule). Product, architecture and open decisions live in the meta-repo: `../CLAUDE.md`, `../docs/business-plan.md`, `../docs/architecture/backend-exploration.md`. Read them before making design decisions; if this repo is checked out on its own, ask for them.
 
 Commit and push changes in this repo first, then bump the submodule pointer in the meta-repo.
 
