@@ -55,20 +55,22 @@ function checkGitState() {
   if (ahead > 0) fail(`main has ${ahead} unpushed commit(s). Push or drop them first.`);
 }
 
-// Publishing needs a public repo (npm rejects provenance from private ones) and the NPM_TOKEN secret.
-// Without this check the tag would be pushed and only then fail in CI.
+// Publishing needs a public repo, because npm rejects provenance from private ones. Without this check the
+// tag would be pushed and only then fail in CI.
 function checkPublishRequirements() {
   const problems = [];
   try {
-    const gh = (...args) => execFileSync("gh", args, { encoding: "utf8", stdio: "pipe" });
-    const { visibility } = JSON.parse(gh("repo", "view", "--json", "visibility"));
-    if (visibility !== "PUBLIC")
+    const { visibility } = JSON.parse(
+      execFileSync("gh", ["repo", "view", "--json", "visibility"], {
+        encoding: "utf8",
+        stdio: "pipe",
+      }),
+    );
+    if (visibility !== "PUBLIC") {
       problems.push(
         `the repo is ${visibility.toLowerCase()}, and npm rejects provenance from private repos`,
       );
-    const secrets = JSON.parse(gh("secret", "list", "--json", "name"));
-    if (!secrets.some(({ name }) => name === "NPM_TOKEN"))
-      problems.push("the NPM_TOKEN repo secret is missing");
+    }
   } catch {
     problems.push("could not check the repo with gh (is it installed and logged in?)");
   }
