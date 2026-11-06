@@ -1,6 +1,6 @@
 {
   "name": "@regresso/browser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Regresso browser client: Core Web Vitals with component attribution, one beacon per page view.",
   "license": "MIT",
   "repository": {

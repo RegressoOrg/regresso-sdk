@@ -1,5 +1,15 @@
 # @regresso/next
 
+## 0.1.1
+
+### Patch Changes
+
+- configure trusted publisher
+- Updated dependencies
+  - @regresso/browser@0.1.1
+  - @regresso/protocol@0.1.1
+  - @regresso/unplugin@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @regresso/browser
 
+## 0.1.1
+
+### Patch Changes
+
+- configure trusted publisher
+- Updated dependencies
+  - @regresso/protocol@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes

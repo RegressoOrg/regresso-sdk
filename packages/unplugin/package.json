@@ -1,6 +1,6 @@
 {
   "name": "@regresso/unplugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Regresso build plugin: tags each component's outermost element with data-cwv, writes the build manifest and uploads it.",
   "license": "MIT",
   "repository": {

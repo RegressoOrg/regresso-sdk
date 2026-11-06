@@ -1,6 +1,6 @@
 {
   "name": "@regresso/next",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Regresso for Next.js: withRegresso(nextConfig) and the client entry for instrumentation-client.ts.",
   "license": "MIT",
   "repository": {
