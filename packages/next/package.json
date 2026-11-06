@@ -5,10 +5,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jeff-spurlock/regresso-sdk.git",
+    "url": "git+https://github.com/RegressoOrg/regresso-sdk.git",
     "directory": "packages/next"
   },
-  "homepage": "https://github.com/jeff-spurlock/regresso-sdk/tree/main/packages/next#readme",
+  "homepage": "https://github.com/RegressoOrg/regresso-sdk/tree/main/packages/next#readme",
   "keywords": [
     "nextjs",
     "next",

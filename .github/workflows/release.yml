@@ -18,7 +18,7 @@ permissions:
 jobs:
   release:
     # Never from forks.
-    if: github.repository == 'jeff-spurlock/regresso-sdk'
+    if: github.repository == 'RegressoOrg/regresso-sdk'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
