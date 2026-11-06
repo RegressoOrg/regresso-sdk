@@ -1,7 +1,8 @@
 name: Release
 
-# Publishes to npm when `pnpm release` pushes a vX.Y.Z tag. Publishing happens here rather than locally
-# because npm provenance can only be generated from CI.
+# Publishes to npm when `pnpm release` pushes a vX.Y.Z tag, using npm trusted publishing (OIDC), so no npm
+# token is stored. Each package's trusted publisher on npmjs.com names this workflow file, so renaming it
+# breaks publishing. Provenance can only be generated from CI, which is why this doesn't run locally.
 
 on:
   push:
@@ -9,7 +10,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # npm provenance
+  id-token: write # npm trusted publishing and provenance
 
 jobs:
   release:
@@ -24,6 +25,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
           registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later, newer than the npm that ships with Node 22.
+      - run: npm install -g npm@^11.5.1
       - run: pnpm install --frozen-lockfile
       - name: Check the tag matches the package version
         run: test "v$(node -p "require('./packages/browser/package.json').version")" = "$GITHUB_REF_NAME"
@@ -32,6 +35,4 @@ jobs:
       - run: pnpm pack:test
       - run: pnpm publish-packages
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"

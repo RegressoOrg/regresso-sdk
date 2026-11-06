@@ -113,6 +113,7 @@ at `0.x` until the API is stable: a breaking change is a minor bump, anything el
 `pnpm changeset` is optional. Any changeset files in the repo are added to the next release's changelog, and if
 one asks for a larger bump than the one you pick, the larger bump applies.
 
-Publishing needs an `NPM_TOKEN` repository secret (an npm automation or granular token with publish rights to
-the `@regresso` scope) and a public repository, because npm rejects provenance from private ones. `pnpm release`
-checks both before it starts.
+Publishing uses npm trusted publishing, so no npm token is stored. Each `@regresso` package has a trusted
+publisher on npmjs.com that names this repo and `release.yml`, so renaming the workflow file breaks publishing.
+The repository must stay public, because npm rejects provenance from private ones, and `pnpm release` checks this
+before it starts. A new package needs one token-based publish before its trusted publisher can be added.
