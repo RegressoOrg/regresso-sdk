@@ -104,12 +104,15 @@ which pnpm rewrites to a semver range on publish; packages from other repos are 
 Packages publish publicly under the `@regresso` npm scope, versioned together (Changesets `fixed` group) and
 at `0.x` until the API is stable: a breaking change is a minor bump, anything else a patch.
 
-1. In each PR that changes a package, run `pnpm changeset` and commit the file it writes.
-2. On merge to `main`, the Release workflow opens or updates a **Version packages** PR with the bumped
-   versions and changelogs.
-3. Merging that PR publishes to npm with provenance, and tags the release.
+1. On an up-to-date, clean `main`, run `pnpm release`. It asks for a major, minor or patch bump and a one-line
+   changelog note, runs the checks, shows the resulting version and asks you to confirm. `pnpm release --dry-run`
+   shows the outcome without running the checks or changing anything.
+2. On confirmation it commits the new versions and changelogs to `main` and pushes a `vX.Y.Z` tag.
+3. The tag triggers the Release workflow, which publishes to npm with provenance from CI.
 
-The workflow needs an `NPM_TOKEN` repository secret (an npm automation or granular token with publish
-rights to the `@regresso` scope) and "Allow GitHub Actions to create and approve pull requests" enabled in
-the repository's Actions settings. npm rejects provenance from private repositories, so make the repository
-public before the first publish (or remove `"provenance": true` from each package's `publishConfig`).
+`pnpm changeset` is optional. Any changeset files in the repo are added to the next release's changelog, and if
+one asks for a larger bump than the one you pick, the larger bump applies.
+
+Publishing needs an `NPM_TOKEN` repository secret (an npm automation or granular token with publish rights to
+the `@regresso` scope) and a public repository, because npm rejects provenance from private ones. `pnpm release`
+checks both before it starts.
