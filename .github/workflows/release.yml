@@ -1,18 +1,14 @@
 name: Release
 
-# On every push to main, changesets/action either opens (or updates) a "Version packages" PR from the
-# pending changesets, or, when that PR has just been merged, publishes the new versions to npm.
+# Publishes to npm when `pnpm release` pushes a vX.Y.Z tag. Publishing happens here rather than locally
+# because npm provenance can only be generated from CI.
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+    tags: ["v*.*.*"]
 
 permissions:
-  contents: write # push the version commit and tags
-  pull-requests: write # open the "Version packages" PR
+  contents: read
   id-token: write # npm provenance
 
 jobs:
@@ -29,17 +25,13 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
+      - name: Check the tag matches the package version
+        run: test "v$(node -p "require('./packages/browser/package.json').version")" = "$GITHUB_REF_NAME"
       - run: pnpm build
       - run: pnpm test
       - run: pnpm pack:test
-      - uses: changesets/action@v1
-        with:
-          version: pnpm version-packages
-          publish: pnpm release
-          title: Version packages
-          commit: Version packages
+      - run: pnpm publish-packages
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
