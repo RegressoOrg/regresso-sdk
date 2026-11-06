@@ -108,12 +108,14 @@ at `0.x` until the API is stable: a breaking change is a minor bump, anything el
    changelog note, runs the checks, shows the resulting version and asks you to confirm. `pnpm release --dry-run`
    shows the outcome without running the checks or changing anything.
 2. On confirmation it commits the new versions and changelogs to `main` and pushes a `vX.Y.Z` tag.
-3. The tag triggers the Release workflow, which publishes to npm with provenance from CI.
+3. The tag triggers the Release workflow, which stages all four packages on npm from CI.
+4. Approve each package with 2FA from its **Staged Packages** tab on npmjs.com, in dependency order:
+   `@regresso/protocol`, `@regresso/browser`, `@regresso/unplugin`, `@regresso/next`. Nothing is public until then.
 
 `pnpm changeset` is optional. Any changeset files in the repo are added to the next release's changelog, and if
 one asks for a larger bump than the one you pick, the larger bump applies.
 
-Publishing uses npm trusted publishing, so no npm token is stored. Each `@regresso` package has a trusted
-publisher on npmjs.com that names this repo and `release.yml`, so renaming the workflow file breaks publishing.
-The repository must stay public, because npm rejects provenance from private ones, and `pnpm release` checks this
-before it starts. A new package needs one token-based publish before its trusted publisher can be added.
+Publishing uses npm trusted publishing, so no npm token is stored, and each trusted publisher is stage-only, so CI
+can't publish directly. Each `@regresso` package's trusted publisher on npmjs.com names this repo and `release.yml`,
+so renaming the workflow file breaks publishing. The repository must stay public, because npm rejects provenance
+from private ones, and `pnpm release` checks this before it starts. A new package needs one token-based publish before its trusted publisher can be added.

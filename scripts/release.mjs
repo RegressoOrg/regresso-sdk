@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Cuts a release from a clean, up-to-date main: asks for the bump, runs the checks, versions the packages,
-// then pushes a commit and a vX.Y.Z tag. The tag triggers .github/workflows/release.yml, which publishes to
-// npm from CI, because provenance can't be generated on a laptop.
+// then pushes a commit and a vX.Y.Z tag. The tag triggers .github/workflows/release.yml, which stages the
+// packages on npm from CI. Nothing goes live until a maintainer approves each one with 2FA.
 //
 // Usage: pnpm release [--dry-run]
 // --dry-run asks the same questions and shows the resulting version, skips the checks, and changes nothing.
@@ -14,6 +14,13 @@ import { createInterface } from "node:readline";
 const dryRun = process.argv.includes("--dry-run");
 const BUMPS = ["major", "minor", "patch"];
 const CHANGESET_DIR = ".changeset";
+// Dependencies first, so a package never goes live before something it depends on.
+const APPROVAL_ORDER = [
+  "@regresso/protocol",
+  "@regresso/browser",
+  "@regresso/unplugin",
+  "@regresso/next",
+];
 
 const git = (...args) => execFileSync("git", args, { encoding: "utf8" }).trim();
 
@@ -163,7 +170,9 @@ async function main() {
       return;
     }
 
-    const confirm = await ask(`\nCommit, tag and push ${tag}? This publishes to npm. [y/N] `);
+    const confirm = await ask(
+      `\nCommit, tag and push ${tag}? CI then stages it on npm for your approval. [y/N] `,
+    );
     if (confirm.toLowerCase() !== "y") {
       console.log("Cancelled. Discarding the changes.");
       discardReleaseChanges();
@@ -181,8 +190,12 @@ async function main() {
       throw error;
     }
     console.log(
-      `\nPushed ${tag}. CI publishes it to npm: https://github.com/RegressoOrg/regresso-sdk/actions/workflows/release.yml`,
+      `\nPushed ${tag}. CI stages the packages on npm: https://github.com/RegressoOrg/regresso-sdk/actions/workflows/release.yml`,
     );
+    console.log(
+      "When that finishes, approve each package with 2FA, in this order, from its Staged Packages tab on npmjs.com:",
+    );
+    console.log(`  ${APPROVAL_ORDER.join(", ")}`);
   } catch (error) {
     if (git("status", "--porcelain")) discardReleaseChanges();
     fail(error.message);
