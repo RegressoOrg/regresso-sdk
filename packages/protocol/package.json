@@ -1,6 +1,6 @@
 {
   "name": "@regresso/protocol",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Regresso beacon protocol: types, validator and codec shared by the browser client and the ingest Worker.",
   "license": "MIT",
   "repository": {
