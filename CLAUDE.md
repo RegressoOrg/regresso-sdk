@@ -1,6 +1,6 @@
 # regresso-sdk
 
-The npm packages customers install. Will be open-sourced (MIT) at public launch; keep it private until then, and write it as if it were already public: no internal URLs, customer names or secrets.
+The npm packages customers install. This repo is public (MIT) and the packages are on npm, so everything here is visible to anyone: no internal URLs, customer names or secrets.
 
 Part of the Regresso workspace (meta-repo: RegressoOrg/regresso, checked out as a submodule). Product, architecture and open decisions live in the meta-repo: `../CLAUDE.md`, `../docs/business-plan.md`, `../docs/architecture/backend-exploration.md`. Read them before making design decisions; if this repo is checked out on its own, ask for them.
 
